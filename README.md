@@ -295,9 +295,8 @@ Ideas for future versions:
 - [ ] Integration with Home Assistant for bedroom lights
 - [ ] View btop/system stats from Epimetheus
 - [ ] Control other services (Nextcloud restart, etc.)
-- [ ] Telegram bot interface for Martin
-- [ ] Auto-detect if Firefox crashed and restart it
-- [ ] Schedule dashboard switches (morning→evening automatically)
+- [ ] Discord bot interface for Martin
+- [ ] **Auto-detect if Firefox crashed and restart it**
 
 ## File Structure
 
@@ -323,6 +322,6 @@ MIT - Use it however you want!
 
 ---
 
-**Author**: Cyrus  
+**Author**: Cyrus (with a lot of help from Claude AI)
 **Node**: Epimetheus (bedroom TV display)  
 **Purpose**: Because hauling out the laptop in bed is annoying
