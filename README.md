@@ -1,6 +1,6 @@
 # 🛏️ Epimetheus Remote
 
-Control your (my) bedroom TV node from your (Martin's) phone! A simple Flask app deployed to K3s that gives you remote control over Epimetheus and its Firefox dashboard. If you're here. If you're reading this, you probably aren't; what are you doing here?
+Control your (my) bedroom TV node from your (Martin's) phone! A simple Flask app deployed to K3s that gives you remote control over Epimetheus and its Firefox dashboard. If you're in my apartment. If you're reading this, statistically speaking, like most humans, you probably aren't in my apartment; what are you doing here?
 
 ```
 epimetheus-remote/
