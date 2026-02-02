@@ -114,7 +114,7 @@ case "${1:-help}" in
         echo "  restart    - Restart the deployment"
         echo "  logs       - View live logs"
         echo "  status     - Check deployment status"
-        echo "  full       - Build, push, and deploy (default)"
+        echo "  full       - Build, push, and deploy"
         echo "  help       - Show this help"
         echo ""
         exit 0
