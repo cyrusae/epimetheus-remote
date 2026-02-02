@@ -1,6 +1,6 @@
 # 🛏️ Epimetheus Remote
 
-Control your bedroom TV node from your phone! A simple Flask app deployed to K3s that gives you remote control over Epimetheus and its Firefox dashboard.
+Control your (my) bedroom TV node from your (Martin's) phone! A simple Flask app deployed to K3s that gives you remote control over Epimetheus and its Firefox dashboard. If you're here. If you're reading this, you probably aren't; what are you doing here?
 
 ```
 epimetheus-remote/
@@ -291,11 +291,11 @@ kubectl apply -f k8s-deployment.yaml
 
 Ideas for future versions:
 
-- [ ] Add more dashboard presets (morning, afternoon, evening, TV mode)
+- [ ] Add more dashboard presets (morning, afternoon, evening, TV mode, PT mode, infrastructure overview)
 - [ ] Integration with Home Assistant for bedroom lights
 - [ ] View btop/system stats from Epimetheus
 - [ ] Control other services (Nextcloud restart, etc.)
-- [ ] Discord bot interface for Martin
+- [ ] Discord bot interface for Martin/Tea
 - [ ] **Auto-detect if Firefox crashed and restart it**
 
 ## File Structure
