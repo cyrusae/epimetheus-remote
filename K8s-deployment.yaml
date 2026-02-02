@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: epimetheus-remote
+  namespace: dashboards
+  labels:
+    app: epimetheus-remote
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: epimetheus-remote
+  template:
+    metadata:
+      labels:
+        app: epimetheus-remote
+    spec:
+      containers:
+      - name: epimetheus-remote
+        image: registry.dawnfire.casa/epimetheus-remote:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+          name: http
+        env:
+        - name: EPIMETHEUS_HOST
+          value: "epimetheus"  # or use IP: "192.168.4.113"
+        - name: SSH_KEY_PATH
+          value: "/ssh-key/id_ed25519"
+        - name: DASHBOARD_URL
+          value: "http://morning.dawnfire.casa"
+        - name: AUTH_ENABLED
+          value: "false"  # Set to "true" to enable basic auth
+        # - name: AUTH_USERNAME
+        #   value: "admin"
+        # - name: AUTH_PASSWORD
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: epimetheus-remote-auth
+        #       key: password
+        volumeMounts:
+        - name: ssh-key
+          mountPath: /ssh-key
+          readOnly: true
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      volumes:
+      - name: ssh-key
+        secret:
+          secretName: epimetheus-ssh-key
+          defaultMode: 0600
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: epimetheus-remote
+  namespace: control-panel
+  labels:
+    app: epimetheus-remote
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 5000
+    protocol: TCP
+    name: http
+  selector:
+    app: epimetheus-remote
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: epimetheus-remote
+  namespace: control-panel
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  rules:
+  - host: remote.dawnfire.casa
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: epimetheus-remote
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - remote.dawnfire.casa
+    secretName: epimetheus-remote-tls

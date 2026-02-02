@@ -2,6 +2,20 @@
 
 Control your bedroom TV node from your phone! A simple Flask app deployed to K3s that gives you remote control over Epimetheus and its Firefox dashboard.
 
+```
+epimetheus-remote/
+├── app.py
+├── requirements.txt
+├── Dockerfile
+├── templates/
+│   └── index.html
+├── k8s-deployment.yaml
+├── epi-remote-commands.sh
+├── deploy.sh
+├── README.md
+└── SETUP_CHECKLIST.md
+```
+
 ## Features
 
 ✅ **Soft Refresh** (F5) - Quick refresh without losing state  
@@ -96,17 +110,6 @@ docker build -t registry.dawnfire.casa/epimetheus-remote:latest .
 
 # Push to your registry
 docker push registry.dawnfire.casa/epimetheus-remote:latest
-```
-
-### Step 5: Create Kubernetes Secret with SSH Key
-
-```bash
-# Base64 encode the private key
-cat ~/epimetheus-remote-key | base64 -w 0
-
-# Copy the output, then edit k8s-deployment.yaml
-# Replace REPLACE_WITH_BASE64_ENCODED_PRIVATE_KEY with your encoded key
-nano k8s-deployment.yaml
 ```
 
 ### Step 6: Deploy to Kubernetes

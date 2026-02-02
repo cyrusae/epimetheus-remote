@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>🛏️ Epimetheus Remote</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Catppuccin Macchiato */
+            --bg-primary: #24273a;    /* Base */
+            --bg-secondary: #1e2030;  /* Mantle */
+            --bg-tertiary: #363a4f;   /* Surface0 */
+            --text-primary: #cad3f5;  /* Text */
+            --text-secondary: #a5adcb; /* Subtext0 */
+            --accent-green: #a6da95;  /* Green */
+            --accent-red: #ed8796;    /* Red */
+            --accent-yellow: #eed49f; /* Yellow */
+            --accent-blue: #8aadf4;   /* Blue */
+            --accent-lavender: #b7bdf8; /* Lavender */
+            --border-color: #494d64;  /* Surface1 */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem 0 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+        }
+
+        .status-row:not(:last-child) {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .status-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .status-value {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-indicator.online { background: var(--accent-green); }
+        .status-indicator.offline { background: var(--accent-red); }
+        .status-indicator.warning { background: var(--accent-yellow); }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--accent-lavender);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-blue);
+            color: var(--bg-primary);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: #494d64;
+        }
+
+        .btn-danger {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ee99a0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .section {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .last-action {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .last-action.success {
+            border-left: 3px solid var(--accent-green);
+        }
+
+        .last-action.error {
+            border-left: 3px solid var(--accent-red);
+        }
+
+        .details-toggle {
+            margin-top: 1rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .details-content {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .details-content.open {
+            display: block;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .logs-container {
+            background: #181926;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.75rem;
+            max-height: 300px;
+            overflow-y: auto;
+            color: var(--accent-green);
+        }
+
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-secondary);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛏️ Epimetheus Remote</h1>
+            <p style="color: var(--text-secondary); font-size: 0.875rem;">Bedroom TV Control</p>
+        </div>
+
+        <!-- Status Card -->
+        <div class="status-card" id="statusCard">
+            <div class="status-row">
+                <span class="status-label">Epimetheus</span>
+                <span class="status-value">
+                    <span class="status-indicator offline" id="epiIndicator"></span>
+                    <span id="epiStatus">Checking...</span>
+                </span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">Firefox</span>
+                <span class="status-value" id="firefoxStatus">Checking...</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">Dashboard</span>
+                <span class="status-value" id="dashboardStatus">Checking...</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">Uptime</span>
+                <span class="status-value" id="uptimeStatus">-</span>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section">
+            <div class="section-title">Quick Actions</div>
+            <button class="btn btn-primary" onclick="refreshDashboard()">
+                🔄 Refresh (F5)
+            </button>
+            <button class="btn btn-secondary" onclick="hardRefresh()">
+                🔁 Hard Refresh (Clear Cache)
+            </button>
+            <button class="btn btn-secondary" onclick="restartFirefox()">
+                🔴 Restart Firefox
+            </button>
+        </div>
+
+        <!-- Advanced Controls -->
+        <div class="section">
+            <div class="section-title">
+                <span style="cursor: pointer;" onclick="toggleDetails('advanced')">
+                    🔽 Advanced Controls
+                </span>
+            </div>
+            <div class="details-content" id="advanced">
+                <input type="text" class="url-input" id="switchUrl" 
+                       placeholder="http://morning.dawnfire.casa" 
+                       value="http://morning.dawnfire.casa">
+                <button class="btn btn-secondary" onclick="switchDashboard()">
+                    📺 Switch Dashboard URL
+                </button>
+                <button class="btn btn-secondary" onclick="viewLogs()">
+                    📜 View Firefox Logs
+                </button>
+                <button class="btn btn-secondary" onclick="restartK3s()">
+                    🔌 Restart K3s Agent
+                </button>
+                <button class="btn btn-danger" onclick="confirmReboot()">
+                    ⚡ Reboot Epimetheus
+                </button>
+            </div>
+        </div>
+
+        <!-- Logs Section -->
+        <div class="section" style="display: none;" id="logsSection">
+            <div class="section-title">Firefox Logs</div>
+            <div class="logs-container" id="logsContent"></div>
+            <button class="btn btn-secondary" onclick="hideLogs()" style="margin-top: 0.75rem;">
+                Close Logs
+            </button>
+        </div>
+
+        <!-- Last Action -->
+        <div class="last-action success" id="lastAction">
+            Ready
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Auto-refresh status every 30 seconds
+        let statusInterval;
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        async function apiCall(endpoint, method = 'POST', body = null) {
+            try {
+                const options = {
+                    method,
+                    headers: { 'Content-Type': 'application/json' }
+                };
+                if (body) options.body = JSON.stringify(body);
+
+                const response = await fetch(endpoint, options);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Request failed');
+                }
+                
+                return data;
+            } catch (error) {
+                showToast('Error: ' + error.message);
+                throw error;
+            }
+        }
+
+        async function updateStatus() {
+            try {
+                const status = await apiCall('/api/status', 'GET');
+                
+                // Epimetheus status
+                const epiIndicator = document.getElementById('epiIndicator');
+                const epiStatus = document.getElementById('epiStatus');
+                if (status.epimetheus_alive) {
+                    epiIndicator.className = 'status-indicator online';
+                    epiStatus.textContent = 'Online';
+                } else {
+                    epiIndicator.className = 'status-indicator offline';
+                    epiStatus.textContent = 'Offline';
+                }
+
+                // Firefox status
+                const firefoxStatus = document.getElementById('firefoxStatus');
+                if (status.firefox_running) {
+                    firefoxStatus.innerHTML = '<span class="status-indicator online"></span> Running';
+                } else {
+                    firefoxStatus.innerHTML = '<span class="status-indicator offline"></span> Not Running';
+                }
+
+                // Dashboard status
+                const dashboardStatus = document.getElementById('dashboardStatus');
+                if (status.dashboard_reachable) {
+                    dashboardStatus.innerHTML = '<span class="status-indicator online"></span> Reachable';
+                } else {
+                    dashboardStatus.innerHTML = '<span class="status-indicator offline"></span> Not Reachable';
+                }
+
+                // Uptime
+                document.getElementById('uptimeStatus').textContent = status.uptime || '-';
+
+            } catch (error) {
+                console.error('Status update failed:', error);
+            }
+        }
+
+        async function updateLastAction() {
+            try {
+                const action = await apiCall('/api/last-action', 'GET');
+                const lastActionEl = document.getElementById('lastAction');
+                const timeSince = Math.floor((Date.now() / 1000) - action.timestamp);
+                const timeStr = timeSince < 60 ? `${timeSince}s ago` : `${Math.floor(timeSince / 60)}m ago`;
+                
+                lastActionEl.textContent = `${action.message} (${timeStr})`;
+                lastActionEl.className = action.success ? 'last-action success' : 'last-action error';
+            } catch (error) {
+                console.error('Last action update failed:', error);
+            }
+        }
+
+        async function refreshDashboard() {
+            showToast('Refreshing dashboard...');
+            try {
+                await apiCall('/api/refresh');
+                showToast('✅ Dashboard refreshed');
+                updateLastAction();
+            } catch (error) {
+                // Error already shown by apiCall
+            }
+        }
+
+        async function hardRefresh() {
+            showToast('Hard refreshing...');
+            try {
+                await apiCall('/api/hard-refresh');
+                showToast('✅ Cache cleared and refreshed');
+                updateLastAction();
+            } catch (error) {
+                // Error already shown by apiCall
+            }
+        }
+
+        async function restartFirefox() {
+            if (!confirm('Restart Firefox? The TV will briefly go blank.')) return;
+            
+            showToast('Restarting Firefox...');
+            try {
+                await apiCall('/api/restart-firefox');
+                showToast('✅ Firefox restarted');
+                updateLastAction();
+                setTimeout(updateStatus, 3000); // Refresh status after restart
+            } catch (error) {
+                // Error already shown by apiCall
+            }
+        }
+
+        async function switchDashboard() {
+            const url = document.getElementById('switchUrl').value;
+            if (!url) {
+                showToast('Please enter a URL');
+                return;
+            }
+
+            showToast('Switching dashboard...');
+            try {
+                await apiCall('/api/switch-dashboard', 'POST', { url });
+                showToast('✅ Switched to ' + url);
+                updateLastAction();
+            } catch (error) {
+                // Error already shown by apiCall
+            }
+        }
+
+        async function viewLogs() {
+            showToast('Fetching logs...');
+            try {
+                const data = await apiCall('/api/logs', 'GET');
+                const logsContent = document.getElementById('logsContent');
+                logsContent.innerHTML = data.logs.join('<br>');
+                document.getElementById('logsSection').style.display = 'block';
+                document.getElementById('logsSection').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                // Error already shown by apiCall
+            }
+        }
+
+        function hideLogs() {
+            document.getElementById('logsSection').style.display = 'none';
+        }
+
+        async function restartK3s() {
+            if (!confirm('Restart K3s agent? This may affect cluster connectivity.')) return;
+            
+            showToast('Restarting K3s...');
+            try {
+                await apiCall('/api/restart-k3s');
+                showToast('✅ K3s agent restarted');
+                updateLastAction();
+            } catch (error) {
+                // Error already shown by apiCall
+            }
+        }
+
+        async function confirmReboot() {
+            if (!confirm('⚠️ REBOOT EPIMETHEUS?\n\nThe TV will go dark and take ~2+ minutes to come back. K3s cluster uptime will be affected.\n\nAre you sure?')) {
+                return;
+            }
+
+            if (!confirm('Really reboot? This is your last chance!')) {
+                return;
+            }
+
+            showToast('Rebooting Epimetheus...');
+            try {
+                await apiCall('/api/reboot', 'POST', { confirmed: true });
+                showToast('✅ Reboot initiated - TV will be back in ~2 minutes');
+                updateLastAction();
+            } catch (error) {
+                // Error already shown by apiCall
+            }
+        }
+
+        function toggleDetails(id) {
+            const element = document.getElementById(id);
+            element.classList.toggle('open');
+        }
+
+        // Initialize
+        updateStatus();
+        updateLastAction();
+        statusInterval = setInterval(() => {
+            updateStatus();
+            updateLastAction();
+        }, 30000); // Every 30 seconds
+
+        // Add pull-to-refresh feel on mobile
+        let touchStartY = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            const touchY = e.touches[0].clientY;
+            const touchDiff = touchY - touchStartY;
+            
+            if (touchDiff > 100 && window.scrollY === 0) {
+                updateStatus();
+                updateLastAction();
+                showToast('Refreshed');
+            }
+        });
+    </script>
+</body>
+</html>
