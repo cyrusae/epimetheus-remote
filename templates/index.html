@@ -312,14 +312,23 @@
                 </span>
             </div>
             <div class="details-content" id="advanced">
-                <input type="text" class="url-input" id="switchUrl" 
-                       placeholder="http://morning.dawnfire.casa" 
-                       value="http://morning.dawnfire.casa">
-                <button class="btn btn-secondary" onclick="switchDashboard()">
-                    📺 Switch Dashboard URL
+                <div class="section-title" style="font-size: 0.75rem; margin-bottom: 0.5rem;">Switch Dashboard</div>
+                <button class="btn btn-secondary" onclick="switchToDashboard('morning')">
+                    🌅 Morning Dashboard
                 </button>
-                <button class="btn btn-secondary" onclick="viewLogs()">
-                    📜 View Firefox Logs
+                <button class="btn btn-secondary" onclick="switchToDashboard('afternoon')">
+                    ☀️ Afternoon Dashboard
+                </button>
+                <button class="btn btn-secondary" onclick="switchToDashboard('evening')">
+                    🌙 Evening Dashboard
+                </button>
+                <button class="btn btn-secondary" onclick="switchToDashboard('tv')">
+                    📺 TV Mode
+                </button>
+                
+                <div class="section-title" style="font-size: 0.75rem; margin: 1rem 0 0.5rem 0;">System</div>
+                <button class="btn btn-secondary" onclick="viewStatusCheck()">
+                    📜 View Kiosk Status
                 </button>
                 <button class="btn btn-secondary" onclick="restartK3s()">
                     🔌 Restart K3s Agent
@@ -330,12 +339,12 @@
             </div>
         </div>
 
-        <!-- Logs Section -->
-        <div class="section" style="display: none;" id="logsSection">
-            <div class="section-title">Firefox Logs</div>
-            <div class="logs-container" id="logsContent"></div>
-            <button class="btn btn-secondary" onclick="hideLogs()" style="margin-top: 0.75rem;">
-                Close Logs
+        <!-- Status Check Section -->
+        <div class="section" style="display: none;" id="statusSection">
+            <div class="section-title">Kiosk Status</div>
+            <div class="logs-container" id="statusContent"></div>
+            <button class="btn btn-secondary" onclick="hideStatusCheck()" style="margin-top: 0.75rem;">
+                Close
             </button>
         </div>
 
@@ -472,38 +481,32 @@
             }
         }
 
-        async function switchDashboard() {
-            const url = document.getElementById('switchUrl').value;
-            if (!url) {
-                showToast('Please enter a URL');
-                return;
-            }
-
-            showToast('Switching dashboard...');
+        async function switchToDashboard(dashboard) {
+            showToast(`Switching to ${dashboard} dashboard...`);
             try {
-                await apiCall('/api/switch-dashboard', 'POST', { url });
-                showToast('✅ Switched to ' + url);
+                await apiCall('/api/switch-dashboard', 'POST', { dashboard });
+                showToast(`✅ Switched to ${dashboard} dashboard`);
                 updateLastAction();
             } catch (error) {
                 // Error already shown by apiCall
             }
         }
 
-        async function viewLogs() {
-            showToast('Fetching logs...');
+        async function viewStatusCheck() {
+            showToast('Fetching kiosk status...');
             try {
-                const data = await apiCall('/api/logs', 'GET');
-                const logsContent = document.getElementById('logsContent');
-                logsContent.innerHTML = data.logs.join('<br>');
-                document.getElementById('logsSection').style.display = 'block';
-                document.getElementById('logsSection').scrollIntoView({ behavior: 'smooth' });
+                const data = await apiCall('/api/status-check', 'GET');
+                const statusContent = document.getElementById('statusContent');
+                statusContent.innerHTML = data.output.join('<br>');
+                document.getElementById('statusSection').style.display = 'block';
+                document.getElementById('statusSection').scrollIntoView({ behavior: 'smooth' });
             } catch (error) {
                 // Error already shown by apiCall
             }
         }
 
-        function hideLogs() {
-            document.getElementById('logsSection').style.display = 'none';
+        function hideStatusCheck() {
+            document.getElementById('statusSection').style.display = 'none';
         }
 
         async function restartK3s() {
@@ -520,7 +523,7 @@
         }
 
         async function confirmReboot() {
-            if (!confirm('⚠️ REBOOT EPIMETHEUS?\n\nThe TV will go dark and take ~2+ minutes to come back. K3s cluster uptime will be affected.\n\nAre you sure?')) {
+            if (!confirm('⚠️ REBOOT EPIMETHEUS?\n\nThe TV will go dark and take ~2 minutes to come back.\n\nAre you sure?')) {
                 return;
             }
 

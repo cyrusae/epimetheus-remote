@@ -136,40 +136,37 @@ def hard_refresh_dashboard():
 @app.route('/api/restart-firefox', methods=['POST'])
 @requires_auth
 def restart_firefox():
-    """Restart Firefox via systemd"""
-    result = ssh_command('systemctl --user restart firefox-dashboard.service || pkill -9 firefox')
+    """Restart Firefox/kiosk using the restart-kiosk.sh script"""
+    result = ssh_command('bash ~/tv/restart-kiosk.sh')
     
     if result['success']:
-        update_last_action('Firefox restarted')
-        return jsonify({'status': 'ok', 'message': 'Firefox restarted'})
+        update_last_action('Kiosk restarted')
+        return jsonify({'status': 'ok', 'message': 'Kiosk restarted'})
     else:
-        update_last_action(f'Firefox restart failed: {result["stderr"]}', False)
+        update_last_action(f'Kiosk restart failed: {result["stderr"]}', False)
         return jsonify({'status': 'error', 'message': result['stderr']}), 500
 
 
 @app.route('/api/switch-dashboard', methods=['POST'])
 @requires_auth
 def switch_dashboard():
-    """Switch to a different dashboard URL"""
+    """Switch to a different dashboard using switch-dashboard.sh"""
     data = request.get_json()
-    url = data.get('url', DASHBOARD_URL)
+    dashboard = data.get('dashboard', 'morning')
     
-    # Navigate Firefox to new URL using xdotool
-    commands = [
-        'DISPLAY=:0 xdotool key ctrl+l',  # Focus address bar
-        f'DISPLAY=:0 xdotool type "{url}"',  # Type URL
-        'DISPLAY=:0 xdotool key Return'  # Press Enter
-    ]
+    # Validate dashboard name
+    valid_dashboards = ['morning', 'afternoon', 'evening', 'tv']
+    if dashboard not in valid_dashboards:
+        return jsonify({'status': 'error', 'message': f'Invalid dashboard: {dashboard}'}), 400
     
-    for cmd in commands:
-        result = ssh_command(cmd)
-        if not result['success']:
-            update_last_action(f'Switch failed: {result["stderr"]}', False)
-            return jsonify({'status': 'error', 'message': result['stderr']}), 500
-        time.sleep(0.5)  # Small delay between commands
+    result = ssh_command(f'bash ~/tv/switch-dashboard.sh {dashboard}')
     
-    update_last_action(f'Switched to {url}')
-    return jsonify({'status': 'ok', 'message': f'Switched to {url}'})
+    if result['success']:
+        update_last_action(f'Switched to {dashboard} dashboard')
+        return jsonify({'status': 'ok', 'message': f'Switched to {dashboard}'})
+    else:
+        update_last_action(f'Dashboard switch failed: {result["stderr"]}', False)
+        return jsonify({'status': 'error', 'message': result['stderr']}), 500
 
 
 # ============================================================================
@@ -239,16 +236,16 @@ def get_last_action():
 # Advanced Controls API
 # ============================================================================
 
-@app.route('/api/logs', methods=['GET'])
+@app.route('/api/status-check', methods=['GET'])
 @requires_auth
-def get_logs():
-    """Get recent Firefox logs"""
-    result = ssh_command('journalctl --user -u firefox-dashboard -n 20 --no-pager')
+def get_status_check():
+    """Get detailed kiosk status using kiosk-status.sh"""
+    result = ssh_command('bash ~/tv/kiosk-status.sh')
     
     if result['success']:
         return jsonify({
             'status': 'ok',
-            'logs': result['stdout'].split('\n')
+            'output': result['stdout'].split('\n')
         })
     else:
         return jsonify({

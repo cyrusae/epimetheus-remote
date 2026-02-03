@@ -17,33 +17,56 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - Command: $SSH_ORIGINAL_COMMAND" >> "$LOG_FI
 
 # Parse the command
 case "$SSH_ORIGINAL_COMMAND" in
-    # Display controls
+    # Soft refresh (F5) - quick reload without losing state
     "DISPLAY=:0 xdotool key F5")
         DISPLAY=:0 xdotool key F5
         ;;
     
+    # Hard refresh (Ctrl+Shift+R) - clear cache
     "DISPLAY=:0 xdotool key ctrl+shift+r")
         DISPLAY=:0 xdotool key ctrl+shift+r
         ;;
     
-    "DISPLAY=:0 xdotool key ctrl+l")
-        DISPLAY=:0 xdotool key ctrl+l
+    # Kiosk management (using existing ~/tv scripts)
+    "bash ~/tv/restart-kiosk.sh")
+        bash ~/tv/restart-kiosk.sh
         ;;
     
-    DISPLAY=:0\ xdotool\ type\ *)
-        # Allow typing URLs (extract the URL part)
-        eval "$SSH_ORIGINAL_COMMAND"
+    "bash ~/tv/kiosk-status.sh")
+        bash ~/tv/kiosk-status.sh
         ;;
     
-    "DISPLAY=:0 xdotool key Return")
-        DISPLAY=:0 xdotool key Return
+    # Dashboard switching
+    "bash ~/tv/switch-dashboard.sh morning")
+        bash ~/tv/switch-dashboard.sh morning
         ;;
     
-    # Firefox controls
-    "systemctl --user restart firefox-dashboard.service || pkill -9 firefox")
-        systemctl --user restart firefox-dashboard.service || pkill -9 firefox
+    "bash ~/tv/switch-dashboard.sh afternoon")
+        bash ~/tv/switch-dashboard.sh afternoon
         ;;
     
+    "bash ~/tv/switch-dashboard.sh evening")
+        bash ~/tv/switch-dashboard.sh evening
+        ;;
+    
+    "bash ~/tv/switch-dashboard.sh tv")
+        bash ~/tv/switch-dashboard.sh tv
+        ;;
+    
+    # TV control
+    "bash ~/tv/tv-on.sh")
+        bash ~/tv/tv-on.sh
+        ;;
+    
+    "bash ~/tv/tv-off.sh")
+        bash ~/tv/tv-off.sh
+        ;;
+    
+    "bash ~/tv/dashboard-mode.sh")
+        bash ~/tv/dashboard-mode.sh
+        ;;
+    
+    # Firefox check
     "pgrep -x firefox")
         pgrep -x firefox
         ;;
@@ -68,11 +91,6 @@ case "$SSH_ORIGINAL_COMMAND" in
     curl\ -s\ -o\ /dev/null\ -w\ *\ http*)
         # Allow curl health checks to local services
         eval "$SSH_ORIGINAL_COMMAND"
-        ;;
-    
-    # Logs
-    "journalctl --user -u firefox-dashboard -n 20 --no-pager")
-        journalctl --user -u firefox-dashboard -n 20 --no-pager
         ;;
     
     # K3s control (requires sudo to be configured)
