@@ -19,6 +19,12 @@ spec:
       - name: epimetheus-remote
         image: registry.dawnfire.casa/epimetheus-remote:latest
         imagePullPolicy: Always
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            cp /ssh-key/id_ed22519 /tmp/id_ed25519
+            chmod 400 /tmp/id_ed25519
+            python -u app.py
         ports:
         - containerPort: 5000
           name: http
@@ -26,7 +32,7 @@ spec:
         - name: EPIMETHEUS_HOST
           value: "epimetheus"  # or use IP: "192.168.4.113"
         - name: SSH_KEY_PATH
-          value: "/ssh-key/id_ed25519"
+          value: "/tmp/id_ed25519"
         - name: DASHBOARD_URL
           value: "http://morning.dawnfire.casa"
         - name: AUTH_ENABLED
