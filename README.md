@@ -110,6 +110,7 @@ docker build -t registry.dawnfire.casa/epimetheus-remote:latest .
 
 # Push to your registry
 docker push registry.dawnfire.casa/epimetheus-remote:latest
+# or use deploy.sh
 ```
 
 ### Step 6: Deploy to Kubernetes
@@ -117,6 +118,7 @@ docker push registry.dawnfire.casa/epimetheus-remote:latest
 ```bash
 # Apply the manifests
 kubectl apply -f k8s-deployment.yaml
+# or deploy.sh deploy
 
 # Check deployment status
 kubectl get pods -n control-panel

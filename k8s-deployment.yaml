@@ -22,15 +22,14 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
           - |
-            cp /ssh-key/id_ed22519 /tmp/id_ed25519
-            chmod 400 /tmp/id_ed25519
+            install -m 400 /ssh-key/id_ed25519 /tmp/id_ed25519
             python -u app.py
         ports:
         - containerPort: 5000
           name: http
         env:
         - name: EPIMETHEUS_HOST
-          value: "epimetheus"  # or use IP: "192.168.4.113"
+          value: "cyrus@epimetheus"  # or use IP: "192.168.4.113"
         - name: SSH_KEY_PATH
           value: "/tmp/id_ed25519"
         - name: DASHBOARD_URL
