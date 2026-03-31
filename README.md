@@ -55,7 +55,7 @@ ssh epimetheus
 
 # Install the command wrapper script
 sudo curl -o /usr/local/bin/epi-remote-commands.sh \
-  https://raw.githubusercontent.com/YOUR_REPO/epimetheus-remote/main/epi-remote-commands.sh
+  https://raw.githubusercontent.com/cyrusae/epimetheus-remote/main/epi-remote-commands.sh
 sudo chmod +x /usr/local/bin/epi-remote-commands.sh
 
 # Edit ~/.ssh/authorized_keys to add command restriction
