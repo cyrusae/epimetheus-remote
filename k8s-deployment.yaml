@@ -33,7 +33,7 @@ spec:
         - name: SSH_KEY_PATH
           value: "/tmp/id_ed25519"
         - name: DASHBOARD_URL
-          value: "http://morning.dawnfire.casa"
+          value: "http://display.dawnfire.casa"
         - name: AUTH_ENABLED
           value: "false"  # Set to "true" to enable basic auth
         # - name: AUTH_USERNAME
